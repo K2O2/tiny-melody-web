@@ -48,13 +48,14 @@
         </el-aside>
 
         <el-main>
-          
-            <el-auto-resizer>
-              <template #default="{ height, width }">
-                <el-table-v2 :columns="columns" :data="list_data" :width="width" :height="height" fixed />
-              </template>
-            </el-auto-resizer>
-          
+
+          <el-auto-resizer>
+            <template #default="{ height, width }">
+              <el-table-v2 :columns="columns" :data="list_data" :width="width" :height="height" auto
+                :row-event-handlers="{ onClick: rowClick }" />
+            </template>
+          </el-auto-resizer>
+
         </el-main>
       </el-container>
       <el-footer height="10vh" class="bplayer">
@@ -71,9 +72,78 @@ import {
   Column,
   ElIcon,
 } from 'element-plus'
-import folder from './components/data/folder.json';
-import tag from './components/data/tag.json';
+// import folder from './components/data/folder.json';
+// import tag from './components/data/tag.json';
 import { ref } from 'vue';
+import { RowEventHandlerParams } from 'element-plus/lib/components/table-v2/src/row.js';
+import axios from 'axios';
+
+// 读取 folder.json 文件
+let folder_data: Tree[] = [];
+
+// 使用fetch API读取JSON文件
+fetch('./folder.json')
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    // 将解析后的JSON数据赋值给全局变量
+    folder_data = data as Tree[];
+    // 现在，您可以在网页的任何地方使用folder_data变量了
+    // console.log(folder_data);
+    // ...进行下一步操作
+  })
+  .catch(error => {
+    console.error('There has been a problem with your fetch operation:', error);
+  });
+
+  // 声明全局变量为数组类型
+let tag_album: string[] = [];
+let tag_title: string[] = [];
+let tag_artist: string[] = [];
+let tag_year: number[] = [];
+
+// 读取 tag.json 文件
+fetch('./tag.json')
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(tag => {
+    // 确保tag对象包含所需的属性，并且它们都是数组
+    if (tag && typeof tag === 'object' && Array.isArray(tag.album) && Array.isArray(tag.title) && Array.isArray(tag.artist) && Array.isArray(tag.year)) {
+      tag_album = tag.album;
+      tag_title = tag.title;
+      tag_artist = tag.artist;
+      tag_year = tag.year;
+
+    } else {
+      throw new Error('Invalid tag data structure');
+    }
+  })
+  .catch(error => {
+    console.error('Error reading tag.json:', error);
+  });
+
+
+const rowClick = (row: RowEventHandlerParams) => {
+  console.log(row.rowData.index)
+
+  axios.post('/api', { data: row.rowData.index })
+    .then(response => {
+      // 处理响应数据
+      console.log(response.data);
+    })
+    .catch(error => {
+      // 处理请求错误
+      console.error(error);
+    });
+}
 
 interface Tree {
   start: number;
@@ -85,64 +155,59 @@ const handleNodeClick = (folderData: Tree) => {
   const { start, count } = folderData;
   console.log(start, count);
 
-  tagIndex = start-1;
+  tagIndex = start - 1;
 
   const newListData = Array.from({ length: count }).map(list_create);
   list_data.value = newListData;
+
 };
 
-const folder_data: Tree[] = folder;
 const defaultProps = {
   start: 'start',
   count: 'count',
 };
 
-const tag_album = tag.album;
-const tag_title = tag.title;
-const tag_artist = tag.artist;
-const tag_year = tag.year;
-
 let tagIndex = -1;
 
 const list_create = () => (
   {
-  index:`${++tagIndex}`,
-  artist:tag_artist[tagIndex],
-  album:tag_album[tagIndex],
-  title:tag_title[tagIndex],
-  year:tag_year[tagIndex],
-}
+    index: `${++tagIndex}`,
+    artist: tag_artist[tagIndex],
+    album: tag_album[tagIndex],
+    title: tag_title[tagIndex],
+    year: tag_year[tagIndex],
+  }
 )
 
 
 const columns: Column<any>[] =
   [
     {
-      title:'Play',
+      title: 'Play',
       key: 'index',
       width: 80,
       align: 'center',
-    }, 
+    },
     {
-      key:'artist',
+      key: 'artist',
       title: 'Artist',
       width: 200,
       dataKey: 'artist',
       // align: 'center',
     }, {
-      key:'album',
+      key: 'album',
       title: 'Album',
       dataKey: 'album',
       width: 400,
       // align: 'center',
     }, {
-      key:'title',
+      key: 'title',
       title: 'Title',
       width: 450,
       dataKey: 'title',
       // align: 'center',
     }, {
-      key:'year',
+      key: 'year',
       title: 'year',
       width: 80,
       dataKey: 'year',
@@ -150,7 +215,7 @@ const columns: Column<any>[] =
     }
   ];
 
-const list_data = ref(Array.from({ length: 200 }).map(list_create))
+const list_data = ref(Array.from({ length: 0 }).map(list_create))
 </script>
 
 <style scoped lang="scss">
