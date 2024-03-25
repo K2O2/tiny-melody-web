@@ -59,7 +59,7 @@
         </el-main>
       </el-container>
       <el-footer height="10vh" class="bplayer">
-        <span>Player</span>
+          <player :music-zz="currentMusicUrl" />
       </el-footer>
     </el-container>
   </div>
@@ -75,8 +75,30 @@ import {
 // import folder from './components/data/folder.json';
 // import tag from './components/data/tag.json';
 import { ref } from 'vue';
-import { RowEventHandlerParams } from 'element-plus/lib/components/table-v2/src/row.js';
+// import { RowEventHandlerParams } from 'element-plus/lib/components/table-v2/src/row.js';
 import axios from 'axios';
+import player from './components/player/player.vue'
+
+const currentMusicUrl = ref('');
+
+const rowClick = (row: { rowData: { index: any; }; }) => {
+  axios.get('/music/'+ row.rowData.index, { data: row.rowData.index, responseType: 'arraybuffer' })
+    .then(response => {
+      // 创建一个Blob对象来存储返回的音乐文件数据
+      const blob = new Blob([response.data], { type: 'audio/mpeg' });
+
+      // 创建一个URL对象来生成音乐文件的URL
+      const url = URL.createObjectURL(blob);
+
+      // 将音乐文件的URL赋值给currentMusicUrl
+      currentMusicUrl.value = url;
+    })
+    .catch(error => {
+      // currentMusicUrl.value = './public/水瀬いのり (水濑祈) - 風色Letter (风色信).mp3';
+      // 处理请求错误
+      console.error(error);
+    });
+};
 
 // 读取 folder.json 文件
 let folder_data: Tree[] = [];
@@ -100,7 +122,7 @@ fetch('./folder.json')
     console.error('There has been a problem with your fetch operation:', error);
   });
 
-  // 声明全局变量为数组类型
+// 声明全局变量为数组类型
 let tag_album: string[] = [];
 let tag_title: string[] = [];
 let tag_artist: string[] = [];
@@ -131,19 +153,8 @@ fetch('./tag.json')
   });
 
 
-const rowClick = (row: RowEventHandlerParams) => {
-  console.log(row.rowData.index)
 
-  axios.post('/api', { data: row.rowData.index })
-    .then(response => {
-      // 处理响应数据
-      console.log(response.data);
-    })
-    .catch(error => {
-      // 处理请求错误
-      console.error(error);
-    });
-}
+
 
 interface Tree {
   start: number;
