@@ -9,23 +9,7 @@
               <span>Melody</span>
             </div>
             <el-menu :default-openeds="[]">
-              <el-menu-item index="1">
-                <template #title>
-                  <el-icon>
-                    <Eleme />
-                  </el-icon>
-                  <span class="menu">Song</span>
-                </template>
-              </el-menu-item>
-              <el-menu-item index="2">
-                <template #title>
-                  <el-icon>
-                    <Tickets />
-                  </el-icon>
-                  <span class="menu">Lists</span>
-                </template>
-              </el-menu-item>
-              <el-sub-menu index="3">
+              <el-sub-menu index="1">
                 <template #title>
                   <el-icon>
                     <Folder />
@@ -40,14 +24,6 @@
                   @node-click="handleNodeClick"
                 />
               </el-sub-menu>
-              <el-menu-item index="4">
-                <template #title>
-                  <el-icon>
-                    <Setting />
-                  </el-icon>
-                  <span class="menu">Setting</span>
-                </template>
-              </el-menu-item>
             </el-menu>
           </el-scrollbar>
         </el-aside>
@@ -75,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { Eleme, Folder, Tickets, Setting } from "@element-plus/icons-vue";
+import { Folder } from "@element-plus/icons-vue";
 import { Column, ElIcon } from "element-plus";
 import { ref } from "vue";
 import axios from "axios";
