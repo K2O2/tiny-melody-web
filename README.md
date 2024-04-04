@@ -1,1 +1,2 @@
-# web-ui for tiny-melody-server
+# Tiny Melody Web
+## web-ui for tiny-melody-server
