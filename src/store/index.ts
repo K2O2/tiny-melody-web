@@ -212,7 +212,7 @@ export const MplaylistStore = defineStore("Mplayerlist", {
     async setPlay() {
       const index = SetPlaylistStore().playlist[this.playIndex];
       if (index >= 0) {
-        this.playIndex = index;
+        //this.playIndex = index;
         try {
           // 假设请求的 API 返回的是 mpeg/audio 类型
           const response = await request.get(`/index/${index}`, {
