@@ -25,6 +25,11 @@ export const useTagStore = defineStore("tag", {
   },
 });
 
+export const playingPage = defineStore("playingPage", {
+  state: () => ({
+    playingShow: false,
+  }),
+});
 export const MPlayerStore = defineStore("Mplayer", {
   state: () => ({
     audioContext: null as AudioContext | null,
@@ -196,7 +201,7 @@ export const MPlayerStore = defineStore("Mplayer", {
           // console.log("duration:", this.duration);
           // this.updateProgressBar(this.currentTime, this.duration);
         }
-      }, 480); // 每秒更新一次时间
+      }, 100); // 每秒更新一次时间
     },
   },
 });

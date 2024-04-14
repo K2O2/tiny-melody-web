@@ -1,8 +1,6 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 
-import player from "./components/player/index.vue";
-
 import router from "./router";
 
 import ElementPlus from "element-plus";
@@ -14,8 +12,6 @@ import { useTagStore } from "./store/index.ts";
 
 const app = createApp(App);
 const pinia = createPinia();
-
-app.component("player", player);
 
 app.use(pinia);
 app.use(router);
