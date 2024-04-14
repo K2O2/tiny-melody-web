@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import request from "../utils/request.ts";
 import { ElMessage } from "element-plus";
+import init, { parse_mp3 } from "../plugin/tiny_melody_plugin.js";
 
 export const useTagStore = defineStore("tag", {
   state: () => ({
@@ -186,7 +187,7 @@ export const MPlayerStore = defineStore("Mplayer", {
           this.currentTime = this.currentTime + this.startTime;
           this.startTime = this.audioContext!.currentTime;
           // 如果需要更新进度条，可以在这里调用一个方法
-          console.log("currentTime:", this.currentTime);
+          // console.log("currentTime:", this.currentTime);
           // // console.log("pauseTime:", this.pauseTime);
           // console.log(
           //   "audioContext.currentTime:",
@@ -195,7 +196,7 @@ export const MPlayerStore = defineStore("Mplayer", {
           // console.log("duration:", this.duration);
           // this.updateProgressBar(this.currentTime, this.duration);
         }
-      }, 1000); // 每秒更新一次时间
+      }, 480); // 每秒更新一次时间
     },
   },
 });
@@ -207,25 +208,39 @@ export const MplaylistStore = defineStore("Mplayerlist", {
     playArtist: "",
     playAlbum: "",
     playTitle: "",
+    playCover: "",
+    playLyric: "",
   }),
   actions: {
     async setPlay() {
       const index = SetPlaylistStore().playlist[this.playIndex];
       if (index >= 0) {
-        //this.playIndex = index;
+        // this.playIndex = index;
         try {
           // 假设请求的 API 返回的是 mpeg/audio 类型
           const response = await request.get(`/index/${index}`, {
             responseType: "arraybuffer", // 请求数组缓冲区类型的响应
           });
+          const uint8Array = new Uint8Array(response.data);
+          //加载封面和歌词
+          await init();
+          const parsedData = parse_mp3(uint8Array);
+          // console.log(parsedData);
+          const result = JSON.parse(parsedData);
+          // console.log(result);
+          this.playCover = result.cover;
+          this.playLyric = result.lyrics;
+          // console.log("cover" + this.playCover);
+          // console.log("lyric" + this.playLyric);
           //获取对应的元数据
           this.playArtist = useTagStore().artist[index];
           this.playAlbum = useTagStore().album[index];
           this.playTitle = useTagStore().title[index];
+
           // 加载音频文件
           await MPlayerStore().Load(response.data);
-          // MPlayerStore().play();
         } catch (error) {
+          console.error(error);
           ElMessage.error("加载文件时出错：" + error);
         }
       }

@@ -26,33 +26,47 @@
         /></div
     ></el-col>
     <el-col :span="14">
-      <div class="playbar">
-        <div class="up">
-          <div class="song-info">
-            <span>{{ MplaylistStore().playArtist }}</span>
-            <span> - </span>
-            <span>{{ MplaylistStore().playAlbum }}</span>
-            <span> - </span>
-            <span>{{ MplaylistStore().playTitle }}</span>
-          </div>
-          <div>
-            <span>{{ formattedCurrentTime }}</span>
-            <span>/</span>
-            <span>{{ formattedDuration }}</span>
-          </div>
+      <div style="display: flex; justify-content: center; align-items: center">
+        <div class="cover">
+          <el-image :src="coverUrl" fit="fit">
+            <template #error>
+              <img
+                src="../../assets/logo256.png"
+                style="height: 9vh; margin-top: 5px"
+              />
+            </template>
+          </el-image>
         </div>
-        <div class="down">
-          <el-slider
-            style="
-              .el-slider__bar {
-                visibility: hidden;
-              }
-            "
-            v-model="progress"
-            :show-tooltip="false"
-            @change="seek"
-            :max="MPlayerStore().duration"
-          />
+        <div class="playbar">
+          <div class="up">
+            <div class="song-info">
+              <el-text style="width: 40vw" size="large" truncated>
+                {{ MplaylistStore().playArtist }}
+                -
+                {{ MplaylistStore().playAlbum }}
+                -
+                {{ MplaylistStore().playTitle }}
+              </el-text>
+            </div>
+            <div>
+              <span>{{ formattedCurrentTime }}</span>
+              <span>/</span>
+              <span>{{ formattedDuration }}</span>
+            </div>
+          </div>
+          <div class="down">
+            <el-slider
+              style="
+                .el-slider__bar {
+                  visibility: hidden;
+                }
+              "
+              v-model="progress"
+              :show-tooltip="false"
+              @change="seek"
+              :max="MPlayerStore().duration"
+            />
+          </div>
         </div>
       </div>
     </el-col>
@@ -100,7 +114,15 @@ import {
 import { computed, ref, watch } from "vue";
 import { MplaylistStore, MPlayerStore } from "../../store/index.ts";
 import { ElNotification } from "element-plus";
+// 封面图,监听 playCover 的变化
+const coverUrl = ref("../../assets/logo256.png");
+const playCover = computed(() => MplaylistStore().playCover);
+watch(playCover, (newValue) => {
+  coverUrl.value = "data:image/jpeg;base64," + newValue;
+});
+// const coverUrl = ref("data:image/jpeg;base64," + MplaylistStore().playCover);
 
+// 播放模式图标
 const PlayModeIcon = computed(() => {
   switch (MplaylistStore().playMethod) {
     case 2:
@@ -223,19 +245,28 @@ const formattedDuration = computed(() => {
   width: 100%;
 }
 .playcontrol {
+  margin-left: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
   width: 100%;
 }
+.cover {
+  height: 10vh;
+  width: 10vh;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-top: 0.5vh;
+}
 .playbar {
+  margin-left: 20px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100%;
-  width: 100%;
+  width: 88%;
   .up {
     margin-top: 10px;
     display: flex;
@@ -244,6 +275,7 @@ const formattedDuration = computed(() => {
     width: 100%;
   }
   .down {
+    margin-top: 2px;
     width: 100%;
   }
 }
